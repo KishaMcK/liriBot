@@ -67,7 +67,7 @@ function spotifyNow(){
   
     var searchMusic;
     if(search === undefined){
-      console.log("Please try again"); //Cannot find user input
+      console.log("Please try again"); //Cant find user input
     }
     else{
       searchMusic = search; //Finds user input
@@ -84,6 +84,7 @@ function spotifyNow(){
   
       else{
         console.dir(data);
+
         // console.log("Artist: " + data.tracks.items[0].artists[0].name);
         // console.log("Song: " + data.tracks.items[0].name);
         // console.log("Album: " + data.tracks.items[0].album.name);
@@ -109,7 +110,7 @@ function movie(){
      else{
        movieSearch = search;
      }
-     var queryUrl = "http://www.omdbapi.com/?t=" + movieSearch + "&y=&plot=short&apikey=40e9cece";
+     var queryUrl = "http://www.omdbapi.com/?t=" + movieSearch + "";
      console.log("movie time?");
      request((queryUrl), function(error,response,body){
        console.log("got hear");
