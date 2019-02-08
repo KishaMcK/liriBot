@@ -5,16 +5,16 @@ require("dotenv").config();
 // Import the node-spotify-api NPM package.
 var Spotify = require("node-spotify-api");
 
-// Import the API keys
+// Import API keys
 var keys = require("./key.js");
 
-// Import the axios npm package.
+// Import axios npm package.
 var axios = require("axios");
 
-// Import the moment npm package.
+// Import moment npm package.
 var moment = require("moment");
 
-// Import the FS package for read/write.
+// Import FS package for read/write.
 var fs = require("fs");
 
 // Initialize the spotify API client using our client id and secret
@@ -76,9 +76,7 @@ var getMyBands = function(artist) {
       for (var i = 0; i < jsonData.length; i++) {
         var show = jsonData[i];
 
-        // Print data about each concert
-        // If a concert doesn't have a region, display the country instead
-        // Use moment to format the date
+        // Print data about each concert, If a concert doesn't have a region, display the country instead Use moment to format the date
         console.log(
           show.venue.city +
             "," +
@@ -93,7 +91,7 @@ var getMyBands = function(artist) {
   );
 };
 
-// Function for running a Movie Search
+// Function that runs Movie Search
 var getMeMovie = function(movieName) {
   if (movieName === undefined) {
     movieName = "Mr Nobody";
@@ -119,7 +117,7 @@ var getMeMovie = function(movieName) {
   );
 };
 
-// Function for running a command based on text file
+// Function that runs a command based on text file
 var doThis = function() {
   fs.readFile("random.txt", "utf8", function(error, data) {
     console.log(data);
@@ -134,7 +132,7 @@ var doThis = function() {
   });
 };
 
-// Function for determining which command is executed
+// Function that determins which command is executed
 var pick = function(caseData, functionData) {
   switch (caseData) {
   case "concert-this":
@@ -157,7 +155,7 @@ var pick = function(caseData, functionData) {
   }
 };
 
-// Function which takes in command line arguments and executes correct function accordingly
+// Function that takes in command line arguments and executes correct function accordingly
 var runIt = function(argOne, argTwo) {
   pick(argOne, argTwo);
 };
