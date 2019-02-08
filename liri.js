@@ -1,157 +1,168 @@
-var keys = require("./keys.js");
-var twitter = require("twitter");
-var spotify = require("spotify");
-var request = require("request");
+
+// Read and set environment variables
+require("dotenv").config();
+
+// Import the node-spotify-api NPM package.
+var Spotify = require("node-spotify-api");
+
+// Import the API keys
+var keys = require("./key.js");
+
+// Import the axios npm package.
+var axios = require("axios");
+
+// Import the moment npm package.
+var moment = require("moment");
+
+// Import the FS package for read/write.
 var fs = require("fs");
 
-//give user their options
-console.log("Type: my-tweets, spotify-song, movie-please, or directions-por-favor.")
+// Initialize the spotify API client using our client id and secret
+var spotify = new Spotify(keys.spotify);
 
-//process[2] the users input
-var userCommand = process.argv[2];
-//process[3] the search parameter
-var search = process.argv[3];
+// FUNCTIONS
+// =====================================
 
-//process multiple words. Will trigger if user types anything more than this first parameter
-for (var i = 4; i < process.argv.length; i++) {
-    search = search += "+" + process.argv[i];
-}
+// Helper function that gets the artist name
+var ArtistNames = function(artist) {
+  return artist.name;
+};
 
-//creating the switch to go between each action
-function masterSearch() {
-    switch (userCommand) {
-        case "my-tweets":
-            findTweets();
-            break;
+// Function for running a Spotify search
+var getSpotify = function(songName) {
+  if (songName === undefined) {
+    songName = "What's my age again";
+  }
 
-        case "spotify-song":
-            spotifyNow();
-            break;
-
-        case "movie-please":
-            MSPointerEvent();
-            break;
-
-        case "directions-por-favor":
-            followDirections();
-            break;
-    }
-}
-
-///////-=-=-=-=-=-=-=-Twitter-=-=-=-=-=-=-=-///////
-function findTweets() {
-    console.log("Here are your latest tweets from your twitter account");
-    //grab the keys from the keys.js file
-    var clientTwitter = new twitter(keys);
-    //get the most recent 10 tweets from users twitter account
-    var parameters = {
-        count: 10
-    };
-
-    clientTwitter.get("status and timeline", parameters, function(error, tweets, response){
-        if(!error){
-          for(i=0; i<tweets.length; i++){
-            var returnData = ("Number: " + (i+1) + "\n" + tweets[i].created_at + "\n" + tweets[i].text + "\n");
-            console.log(returnData);
-            console.log("--------------------------");
-          }
-        }
-      });    
-}
-////end Twitter area////
-
-
-/*****Spotify Area**********/
-function spotifyNow(){
-    console.log("Now time for some music!");
-  
-    var searchMusic;
-    if(search === undefined){
-      console.log("Please try again"); //Cant find user input
-    }
-    else{
-      searchMusic = search; //Finds user input
-    }
-  
-    spotify.search({type: "track", query: searchMusic}, function(err , data){
-      if(err){
+  spotify.search(
+    {
+      type: "track",
+      query: songName
+    },
+    function(err, data) {
+      if (err) {
         console.log("Error occurred: " + err);
         return;
-      } else if (data.error) {
-        console.log("Error occurred: " + data);
+      }
+
+      var songs = data.tracks.items;
+
+      for (var i = 0; i < songs.length; i++) {
+        console.log(i);
+        console.log("artist(s): " + songs[i].artists.map(ArtistNames));
+        console.log("song name: " + songs[i].name);
+        console.log("preview song: " + songs[i].preview_url);
+        console.log("album: " + songs[i].album.name);
+        console.log("-----------------------------------");
+      }
+    }
+  );
+};
+
+var getMyBands = function(artist) {
+  var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
+
+  axios.get(queryURL).then(
+    function(response) {
+      var jsonData = response.data;
+
+      if (!jsonData.length) {
+        console.log("No results found for " + artist);
         return;
       }
-  
-      else{
-        console.dir(data);
 
-        // console.log("Artist: " + data.tracks.items[0].artists[0].name);
-        // console.log("Song: " + data.tracks.items[0].name);
-        // console.log("Album: " + data.tracks.items[0].album.name);
-        // console.log("Preview here: " + data.tracks.items[0].preview_url);
+      console.log("Upcoming concerts for " + artist + ":");
+
+      for (var i = 0; i < jsonData.length; i++) {
+        var show = jsonData[i];
+
+        // Print data about each concert
+        // If a concert doesn't have a region, display the country instead
+        // Use moment to format the date
+        console.log(
+          show.venue.city +
+            "," +
+            (show.venue.region || show.venue.country) +
+            " at " +
+            show.venue.name +
+            " " +
+            moment(show.datetime).format("MM/DD/YYYY")
+        );
       }
-  
-    });
-  
+    }
+  );
+};
+
+// Function for running a Movie Search
+var getMeMovie = function(movieName) {
+  if (movieName === undefined) {
+    movieName = "Mr Nobody";
   }
-  /*****Spotify Area End**********/
 
-  /******Movie Area**********/
+  var urlHit =
+    "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&apikey=trilogy";
 
-function movie(){
+  axios.get(urlHit).then(
+    function(response) {
+      var jsonData = response.data;
 
-    /**You can follow the in-class request exercise for this**/
-     console.log("Movie Time!");
-   
-     var movieSearch;
-     if(search === undefined){
-       movieSearch = "Sharknado";
-     }
-     else{
-       movieSearch = search;
-     }
-     var queryUrl = "http://www.omdbapi.com/?t=" + movieSearch + "";
-     console.log("movie time?");
-     request((queryUrl), function(error,response,body){
-       console.log("got hear");
-       if(!error && response.statusCode === 200){
-         console.log("Title: " + JSON.parse(body).Title);
-         console.log("Release Year: " + JSON.parse(body).Year);
-         console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
-         console.log("Country: " + JSON.parse(body).Country);
-         console.log("Language: " + JSON.parse(body).Language);
-         console.log("Plot: " + JSON.parse(body).Plot);
-         console.log("Actors & Actresses: " + JSON.parse(body).Actors);
-         console.log("Rotten Tomatoes Rating: " + JSON.parse(body).tomatoRating);
-         console.log("Rotten Tomatoes URL: " + JSON.parse(body).tomatoURL);
-       }
-     });
-   }
-   /******Movie Area End**********/
-   
-   
-   /********TEXT FILE AREA*********/
-   function followDirections(){
-     console.log("Looking at the txt file you created. Processing........");
-   
-     fs.readFile("random.txt", "utf8", function(error,data){
-       if(error){
-         console.log("Here is the error: " + error);
-       }
-       else{
-         var dataArr = data.split(",");
-         userCommand = dataArr[0];
-         search = dataArr[1];
-   
-         //if multiword search
-         for(i=2; i<data.Arr.length; i++){
-           search= search + "+" + dataArr[i];
-         }
-   
-         masterSearch();
-       }
-     })
-   }
-   
-   masterSearch();
-   
+      console.log("Title: " + jsonData.Title);
+      console.log("Year: " + jsonData.Year);
+      console.log("Rated: " + jsonData.Rated);
+      console.log("IMDB Rating: " + jsonData.imdbRating);
+      console.log("Country: " + jsonData.Country);
+      console.log("Language: " + jsonData.Language);
+      console.log("Plot: " + jsonData.Plot);
+      console.log("Actors: " + jsonData.Actors);
+      console.log("Rotten Tomatoes Rating: ",jsonData.Ratings[Math.min(1,jsonData.Ratings.length-1)].Value);
+    }
+  );
+};
+
+// Function for running a command based on text file
+var doThis = function() {
+  fs.readFile("random.txt", "utf8", function(error, data) {
+    console.log(data);
+
+    var dataArr = data.split(",");
+
+    if (dataArr.length === 2) {
+      pick(dataArr[0], dataArr[1]);
+    } else if (dataArr.length === 1) {
+      pick(dataArr[0]);
+    }
+  });
+};
+
+// Function for determining which command is executed
+var pick = function(caseData, functionData) {
+  switch (caseData) {
+  case "concert-this":
+    getMyBands(functionData);
+    break;
+  case "spotify-this-song":
+    getSpotify(functionData);
+    break;
+  case "movie-this":
+    getMeMovie(functionData);
+    break;
+  case "do-what-it-says":
+    doThis();
+    break;
+    case "beautiful-life":
+    beautifullife();
+    break;
+  default:
+    console.log("LIRI doesn't know that");
+  }
+};
+
+// Function which takes in command line arguments and executes correct function accordingly
+var runIt = function(argOne, argTwo) {
+  pick(argOne, argTwo);
+};
+
+// MAIN PROCESS
+// =====================================
+runIt(process.argv[2], process.argv.slice(3).join(" "));
+
