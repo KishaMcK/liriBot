@@ -45,21 +45,21 @@ var getSpotify = function(songTitle) {
   );
 };
 
-var getMyBands = function(artist) {
+var getBands = function(artist) {
   var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
   axios.get(queryURL).then(
     function(response) {
-      var jsonData = response.data;
+      var jsonInfo = response.data;
 
-      if (!jsonData.length) {
+      if (!jsonInfo.length) {
         console.log("No results found for " + artist);
         return;
       }
       console.log("Upcoming concerts for " + artist + ":");
 
-      for (var i = 0; i < jsonData.length; i++) {
-        var show = jsonData[i];
+      for (var i = 0; i < jsonInfo.length; i++) {
+        var show = jsonInfo[i];
 
         //prints info about concerts
         console.log(
@@ -77,15 +77,15 @@ var getMyBands = function(artist) {
 };
 
 //Function that runs Movie Search
-var getMeMovie = function(movieName) {
+var getMovie = function(movieName) {
   if (movieName === undefined) {
-    movieName = "Mr Nobody";
+    movieName = "Forrest Gump";
   }
 
-  var urlHit =
+  var movieHit =
     "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&apikey=trilogy";
 
-  axios.get(urlHit).then(
+  axios.get(movieHit).then(
     function(response) {
       var jsonInfo = response.data;
 
@@ -107,12 +107,12 @@ var runThis = function() {
   fs.readFile("random.txt", "utf8", function(error, data) {
     console.log(data);
 
-    var dataArr = data.split(",");
+    var datArr = data.split(",");
 
-    if (dataArr.length === 2) {
-      choice(dataArr[0], dataArr[1]);
-    } else if (dataArr.length === 1) {
-      choice(dataArr[0]);
+    if (datArr.length === 2) {
+      choice(datArr[0], datArr[1]);
+    } else if (datArr.length === 1) {
+      choice(datArr[0]);
     }
   });
 };
@@ -136,7 +136,7 @@ var choice = function(caseData, functionData) {
     beautifullife();
     break;
   default:
-    console.log("LIRI doesn't know that");
+    console.log("LIRI doesn't understand that");
   }
 };
 
