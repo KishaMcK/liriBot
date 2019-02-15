@@ -1,43 +1,29 @@
-
-// Read and set environment variables
+//reads and sets environment variables
 require("dotenv").config();
-
-// Import the node-spotify-api NPM package.
+//the following code imports node-spotify-api, api keys, axios, moment, fs.
 var Spotify = require("node-spotify-api");
-
-// Import API keys
 var keys = require("./key.js");
-
-// Import axios npm package.
 var axios = require("axios");
-
-// Import moment npm package.
 var moment = require("moment");
-
-// Import FS package for read/write.
 var fs = require("fs");
-
-// Initialize the spotify API client using our client id and secret
 var spotify = new Spotify(keys.spotify);
 
-// FUNCTIONS
-// =====================================
+//~~~~FUNCTIONS~~~~~
 
-// Helper function that gets the artist name
-var ArtistNames = function(artist) {
+//gets the artist name
+var artistName = function(artist) {
   return artist.name;
 };
-
-// Function for running a Spotify search
-var getSpotify = function(songName) {
-  if (songName === undefined) {
-    songName = "What's my age again";
+//runs search
+var getSpotify = function(songTitle) {
+  if (songTitle === undefined) {
+    songTitle = "V. 3005";
   }
 
   spotify.search(
     {
       type: "track",
-      query: songName
+      query: songTitle
     },
     function(err, data) {
       if (err) {
@@ -49,7 +35,7 @@ var getSpotify = function(songName) {
 
       for (var i = 0; i < songs.length; i++) {
         console.log(i);
-        console.log("artist(s): " + songs[i].artists.map(ArtistNames));
+        console.log("artist(s): " + songs[i].artists.map(artistName));
         console.log("song name: " + songs[i].name);
         console.log("preview song: " + songs[i].preview_url);
         console.log("album: " + songs[i].album.name);
@@ -70,13 +56,12 @@ var getMyBands = function(artist) {
         console.log("No results found for " + artist);
         return;
       }
-
       console.log("Upcoming concerts for " + artist + ":");
 
       for (var i = 0; i < jsonData.length; i++) {
         var show = jsonData[i];
 
-        // Print data about each concert, If a concert doesn't have a region, display the country instead Use moment to format the date
+        //prints info about concerts
         console.log(
           show.venue.city +
             "," +
@@ -91,7 +76,7 @@ var getMyBands = function(artist) {
   );
 };
 
-// Function that runs Movie Search
+//Function that runs Movie Search
 var getMeMovie = function(movieName) {
   if (movieName === undefined) {
     movieName = "Mr Nobody";
@@ -102,50 +87,50 @@ var getMeMovie = function(movieName) {
 
   axios.get(urlHit).then(
     function(response) {
-      var jsonData = response.data;
+      var jsonInfo = response.data;
 
-      console.log("Title: " + jsonData.Title);
-      console.log("Year: " + jsonData.Year);
-      console.log("Rated: " + jsonData.Rated);
-      console.log("IMDB Rating: " + jsonData.imdbRating);
-      console.log("Country: " + jsonData.Country);
-      console.log("Language: " + jsonData.Language);
-      console.log("Plot: " + jsonData.Plot);
-      console.log("Actors: " + jsonData.Actors);
-      console.log("Rotten Tomatoes Rating: ",jsonData.Ratings[Math.min(1,jsonData.Ratings.length-1)].Value);
+      console.log("Title: " + jsonInfo.Title);
+      console.log("Year: " + jsonInfo.Year);
+      console.log("Rated: " + jsonInfo.Rated);
+      console.log("IMDB Rating: " + jsonInfo.imdbRating);
+      console.log("Country: " + jsonInfo.Country);
+      console.log("Language: " + jsonInfo.Language);
+      console.log("Plot: " + jsonInfo.Plot);
+      console.log("Actors: " + jsonInfo.Actors);
+      console.log("Rotten Tomatoes Rating: ",jsonInfo.Ratings[Math.min(1,jsonInfo.Ratings.length-1)].Value);
     }
   );
 };
 
-// Function that runs a command based on text file
-var doThis = function() {
+//runs a command based on random.txt file
+var runThis = function() {
   fs.readFile("random.txt", "utf8", function(error, data) {
     console.log(data);
 
     var dataArr = data.split(",");
 
     if (dataArr.length === 2) {
-      pick(dataArr[0], dataArr[1]);
+      choice(dataArr[0], dataArr[1]);
     } else if (dataArr.length === 1) {
-      pick(dataArr[0]);
+      choice(dataArr[0]);
     }
   });
 };
 
-// Function that determins which command is executed
-var pick = function(caseData, functionData) {
+//resolves what comand is ran
+var choice = function(caseData, functionData) {
   switch (caseData) {
   case "concert-this":
-    getMyBands(functionData);
+    getBands(functionData);
     break;
   case "spotify-this-song":
     getSpotify(functionData);
     break;
   case "movie-this":
-    getMeMovie(functionData);
+    getMovie(functionData);
     break;
   case "do-what-it-says":
-    doThis();
+    runThis();
     break;
     case "beautiful-life":
     beautifullife();
@@ -155,12 +140,11 @@ var pick = function(caseData, functionData) {
   }
 };
 
-// Function that takes in command line arguments and executes correct function accordingly
+//takes in command line arguments and exicutes corect function
 var runIt = function(argOne, argTwo) {
-  pick(argOne, argTwo);
+  choice(argOne, argTwo);
 };
 
 // MAIN PROCESS
-// =====================================
 runIt(process.argv[2], process.argv.slice(3).join(" "));
 
